@@ -14,7 +14,7 @@
 
     // Create main object Game
     // Game(id_element, height, width, fps)
-    var game = new Game('canvas', 500, 1900, 60);
+    var game = new Game('canvas', 900, 1900, 60);
 
     // Create Game Object
     // gameObject(name)
@@ -91,6 +91,41 @@
 
     // Change position object
     cube2D.transform.position = new Vector2(50, 50);
+
+    var componentMove = new Component("Move", function (comp) {
+        var position;
+        var shape;
+        var r = 255, g =0, b=0;
+
+        this.Start = function () {
+            var gameObject = comp.getParent();
+            position = gameObject.transform.position;
+            shape = gameObject.getComponent("Shape").getScript();
+        };
+
+        this.Update = function () {
+            position.add(new Vector2(5, 0));
+            if(r > 254){
+                g++;
+                b--;
+            }
+            if(b > 254){
+                r--;
+                b++;
+            }
+            if(b > 254){
+                r++;
+                g--;
+            }
+            shape.material.backgroundColor = new Color(r,g,b, 180);
+            if(position.x > 400){
+                position.set(new Vector2(0,0));
+            }
+        };
+
+    });
+
+    cube2D.addComponent(componentMove);
 
 
 </script>
