@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TODO supply a title</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    </style>
+    <script src="js/canvasEngine.js"></script>
+</head>
+<body>
+<canvas id="canvas" style="border: 3px solid blue;"></canvas>
+<script>
+
+    // Create main object Game
+    // Game(id_element, height, width, fps)
+    var game = new Game('canvas', 500, 1900, 60);
+
+    // Create Game Object
+    // gameObject(name)
+    var camera = new gameObject('camera');
+
+    // Create Component
+    // Component(name, script[function/object])
+    var compCamera = new Component("Camera", new Camera());
+
+    // On script you can put parameter who return public methods class Component.
+    var compMoveCamera = new Component("MoveCamera", function (comp) {
+        var position;
+
+        // Method Start will be used when you put gameObject with this Component to Game
+        // or if you put this script to Component to gameObject who is in the Game.
+        this.Start = function(){
+            // Use methods class Component
+            position = comp.getParent().transform.position; // Get position gameObject where is Component
+            // position type is Vector2
+        };
+
+        // Method Update will be used when you put gameObject with this Component to Game and event 'Game Update' will be active
+        // On Update you can put parameter who return 'Game Events'
+        this.Update = function(e){
+            // Event input get events keyboard or mouse
+            // Used subtract()
+            if(e.input.getKeyDown(KeyCode.UP_ARROW)) {
+                // Move gameObject 10 pixel up
+                position.subtract(new Vector2(0, 10));
+            }
+            if(e.input.getKeyDown(KeyCode.DOWN_ARROW)){
+                // Move gameObject 10 pixel down
+                position.subtract(new Vector2(0, -10));
+            }
+            // Used add()
+            if(e.input.getKeyDown(KeyCode.LEFT_ARROW)){
+                // Move gameObject 10 pixel left
+                position.add(new Vector2(-10, 0));
+            }
+            if(e.input.getKeyDown(KeyCode.RIGHT_ARROW)){
+                // Move gameObject 10 pixel right
+                position.add(new Vector2(10, 0));
+            }
+        };
+    });
+
+    // Add Components to gameObject
+    camera.addComponent(compCamera); // Name added components have to other
+    camera.addComponent(compMoveCamera); // Added Component was clone so you can use same Component more to other gameObjects
+
+    // Set foothold to center point element canvas
+    camera.foothold.point = new Point(Verticaly.CENTER, Horizontal.CENTER);
+
+    var cube2D = new gameObject('cube2D'); // Create new gameObject
+
+    // Create new Shape
+    var shape = new Shape();
+    // Change material color
+    shape.material.backgroundColor = new Color(200,100,0,200);
+
+    // Create new Component
+    var compShape = new Component(shape); // If object constructor has got name you haven't to put name Component.
+
+    // Add Component to gameObject
+    cube2D.addComponent(compShape);
+
+    // Add gameObjects to Game
+    game.addGameObject(camera); // Added gameObject wasn't clone so you can easiest modify object,
+    // If you wont some object put up then other set level.
+    game.addGameObject(cube2D, 6); // but you can't add same gameObject again. You have to clone this object.
+    game.addGameObject(cube2D.clone(new Vector2(5, 90)));
+    game.addGameObject(cube2D.clone(new Vector2(54, 27)));
+    game.addGameObject(cube2D.clone(new Vector2(365, 56)));// Name can't be same so added gameObject has got change name.
+
+    // Change position object
+    cube2D.transform.position = new Vector2(50, 50);
+
+
+</script>
+</body>
+</html>
