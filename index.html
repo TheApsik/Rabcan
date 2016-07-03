@@ -95,9 +95,18 @@
     var componentMove = new Component("Move", function (comp) {
         var position;
         var shape;
-        var r = 255, g =0, b=0;
+        var r = 0, g =0, b=0;
+        var x;
+        var y;
+        var lenght;
 
         this.Start = function () {
+            lenght = parseInt(Math.random()*2000);
+            r = parseInt(Math.random()*255);
+            g = parseInt(Math.random()*255);
+            b = parseInt(Math.random()*255);
+            y = parseInt(Math.random()*5000-2000);
+            x = parseInt(Math.random()*5000-5000);
             var gameObject = comp.getParent();
             position = gameObject.transform.position;
             shape = gameObject.getComponent("Shape").getScript();
@@ -118,14 +127,16 @@
                 g--;
             }
             shape.material.backgroundColor = new Color(r,g,b, 180);
-            if(position.x > 400){
-                position.set(new Vector2(0,0));
+            if(position.x > lenght){
+                position.set(new Vector2(x,y));
             }
         };
 
     });
 
     cube2D.addComponent(componentMove);
+    for(var i = 0; i < 1000; i++)
+        game.addGameObject(cube2D.clone(), 6);
 
 
 </script>

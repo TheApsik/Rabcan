@@ -360,6 +360,7 @@ function Camera(compoment){
 
     this.Update = function(){
         context2D.clearRect(0, 0, game.width(), game.height());
+        objects = 0;
 
         for(var b = 0; b < gameObjects.length; b++){
             if(gameObjects[b] == undefined)
@@ -372,28 +373,31 @@ function Camera(compoment){
                 this.renderer(gameObjects[b][c]);
             }
         }
-
     };
 
-    this.renderer = function(gameObject){
-        var compShape = gameObject.getComponent('Shape');
-
+    this.renderer = function(GameObject){
+        var compShape = GameObject.getComponent('Shape');
+        
         if(compShape == undefined)
             return;
 
         var shape = compShape.getScript();
-
         if(shape.show == false)
             return;
 
-        this.draw(gameObject.transform.position, shape)
-    };
+        var size = shape.getSize();
 
-    this.draw = function(pos, shape){
-        context2D.beginPath();
         var comSize = gameObject.foothold.getPosition(new Size(this.size.height.getValue(game.height()),this.size.width.getValue(game.width())));
         var cameraPoz = gameObject.transform.position;
-        var vector = pos.clone().add(comSize).subtract(cameraPoz);
+        var vector = GameObject.transform.position.clone().add(comSize).subtract(cameraPoz);
+
+        if(vector.x + size.width > 0 && vector.x < this.size.width.getValue(game.width())
+            && vector.y + size.height > 0 && vector.y < this.size.height.getValue(game.height()))
+            this.draw(vector, shape)
+    };
+
+    this.draw = function(vector, shape){
+        context2D.beginPath();
         switch(shape.figure.getType()){
             case FigureType.square:
                 var size = shape.getSize();
