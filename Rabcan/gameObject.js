@@ -10,8 +10,6 @@ function gameObject(Name, Position){
     var components;
     var updateList;
     var listComponentsImplementingClass;
-    var listGameObjectsWhoHaveUpdateFunction;
-    var lengthGameObjectsWhoHaveUpdateFunction;
 
     var game;
     var parent;
@@ -74,6 +72,11 @@ function gameObject(Name, Position){
                         throw Error("TimeoutAssignGameObjectException: Can't add more gameObjects. Limit exceeded.");
 
                     game = parent.getGame();
+                    if(gameObjects.length > 0){
+                        for(var GameObject in listNameGameObject){
+                            gameObjects[listNameGameObject[GameObject].level][listNameGameObject[GameObject].page].assign();
+                        }
+                    }
                 }
             }else
                 throw Error("TypeGameException: Can't assign Parent. Parent isn't type gameObject/Game.");
@@ -101,14 +104,6 @@ function gameObject(Name, Position){
         return components[Name] ? true: false;
     };
 
-    this.haveUpdateFunction = function (GameObject) {
-        if(listNameGameObject[GameObject.getName()] == GameObject){
-            listGameObjectsWhoHaveUpdateFunction[GameObject.getName()] = GameObject;
-            if(parent)
-                parent.haveUpdateFunction(this);
-        }
-    };
-
     this.addComponent = function(component){
         if(component instanceof Component){
             if(component.getName() == undefined)
@@ -123,12 +118,12 @@ function gameObject(Name, Position){
             this[component.getName()] = components[component.getName()].getScript();
             if(components[component.getName()].isUpdate()){
                 updateList[component.getName()] = components[component.getName()].update;
-                if(parent)
-                    parent.haveUpdateFunction(this);
             }
             
-            if(game)
+            if(game) {
                 components[component.getName()].start();
+                game.addGameObjectUpdates(this, updateList);
+            }
 
             return components[component.getName()].getScript();
         }else
@@ -136,13 +131,18 @@ function gameObject(Name, Position){
     };
     
     this.startComponents = function(){
-        for(var gObject in listNameGameObject) {
-            gameObjects[listNameGameObject[gObject].level][listNameGameObject[gObject].page].startComponents();
-        }
+        if(game) {
+            if(Object.keys(updateList).length !== 0)
+                game.addGameObjectUpdates(this, updateList);
+            for (var gObject in listNameGameObject) {
+                gameObjects[listNameGameObject[gObject].level][listNameGameObject[gObject].page].startComponents();
+            }
 
-        for(var component in components) {
-            components[component].start();
-        }
+            for (var component in components) {
+                components[component].start();
+            }
+        }else
+            throw Error("NoGameException: This gameObject haven't game.");
     };
 
     this.getComponent = function (Name) {
@@ -155,6 +155,8 @@ function gameObject(Name, Position){
                 components[Name].destroy();
                 delete this[Name];
                 delete updateList[Name];
+                if(game)
+                    game.addGameObjectUpdates(this, updateList);
                 delete components[Name];
                 for(var classImple in listComponentsImplementingClass){
                     for(var comp in listComponentsImplementingClass[classImple]){
@@ -288,7 +290,7 @@ function gameObject(Name, Position){
         var GameObjectsClass = listGameObjectsImplementingClass[className];
         if(GameObjectsClass != undefined) {
             for (var i = 0; i < GameObjectsClass.length; i++) {
-                if (GameObjectsClass[i] == undefined)
+                if (GameObjectsClass[i] == undefined && GameObjectsClass[i][a].active)
                     continue;
 
                 for (var a = 0; a < GameObjectsClass[i].length; a++) {
@@ -378,8 +380,6 @@ function gameObject(Name, Position){
     listNameGameObject = [];
     listComponentsImplementingClass = [];
     listGameObjectsImplementingClass = [];
-    listGameObjectsWhoHaveUpdateFunction = [];
-    lengthGameObjectsWhoHaveUpdateFunction = 0;
     gameObjects = [];
     components = [];
     updateList = [];

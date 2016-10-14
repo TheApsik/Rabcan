@@ -10,6 +10,8 @@ function Game(Element, Height, Width, Tick){
     var listNameGameObject;
     
     var listGameObjectsImplementingClass;
+    
+    var listUpdate;
 
     var tickRate;
     var tick;
@@ -24,7 +26,11 @@ function Game(Element, Height, Width, Tick){
 
     function update(){
         ++tick;
-        //DEBUG('update');
+        for(var i = 0; i <listUpdate.length; i++){
+            for(var a = 0; a<listUpdate[i].length; a++){
+                listUpdate[i][a]();
+            }
+        }
     }
 
     // public
@@ -57,11 +63,11 @@ function Game(Element, Height, Width, Tick){
             if(this.isGameObjectWithName(GameObject.getName()))
                 throw Error("DuplicateNameGameObjectException: gameObject with the name '" + GameObject.getName() + "' is added. Can't add gameObject with the same name.");
 
-            var lenght = gameObjects[level].length;
-            gameObjects[level][lenght] = GameObject;
-            listNameGameObject[gameObjects[level][lenght].getName()] = {level: level, page: lenght};
-            gameObjects[level][lenght].assign(this);
-            gameObjects[level][lenght].startComponents();
+            var length = gameObjects[level].length;
+            gameObjects[level][length] = GameObject;
+            listNameGameObject[gameObjects[level][length].getName()] = {level: level, page: length};
+            gameObjects[level][length].assign(this);
+            gameObjects[level][length].startComponents();
             
 
         }else
@@ -103,7 +109,7 @@ function Game(Element, Height, Width, Tick){
                     continue;
 
                 for (var a = 0; a < GameObjectsClass[i].length; a++) {
-                    if (GameObjectsClass[i][a] == undefined)
+                    if (GameObjectsClass[i][a] == undefined && GameObjectsClass[i][a].active)
                         continue;
 
                     if(GameObjectsClass[i][a].active) {
@@ -164,6 +170,18 @@ function Game(Element, Height, Width, Tick){
         return tickRate;
     };
 
+    this.addGameObjectUpdates = function(GameObject, ListUpdates){
+        if(GameObject instanceof gameObject) {
+            var ID = GameObject.getId();
+            listUpdate[ID] = [];
+            for(var Update in ListUpdates){
+                listUpdate[ID][listUpdate[ID].length] = ListUpdates[Update];
+            }
+        }
+        else
+            throw Error("TypeVariableException: Paramether GameObject have to be gameObject");
+    };
+
     //#Canvas
     this.setHeight = function(Height){
         element.height = Height;
@@ -197,6 +215,5 @@ function Game(Element, Height, Width, Tick){
     gameObjects = [];
     listNameGameObject = [];
     listGameObjectsImplementingClass = [];
-
-
+    listUpdate = [];
 }
